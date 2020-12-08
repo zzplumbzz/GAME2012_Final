@@ -1,15 +1,15 @@
 ﻿  02_CubeTexture.cpp
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_W10_Lecture\GAME2012_W10_Lecture\FirstExample\Shape.h(53,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_W10_Lecture\GAME2012_W10_Lecture\FirstExample\Shape.h(77,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_W10_Lecture\GAME2012_W10_Lecture\FirstExample\Shape.h(94,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(53,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(77,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(94,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
           with
           [
               _Ty=GLfloat
           ]
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_W10_Lecture\GAME2012_W10_Lecture\FirstExample\Shape.h(95,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(95,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
           with
           [
               _Ty=GLfloat
           ]
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_W10_Lecture\GAME2012_W10_Lecture\FirstExample\Shape.h(132,21): warning C4018: '<': signed/unsigned mismatch
-  FirstExample.vcxproj -> C:\Users\nicol\Desktop\3D Grapics\GAME2012_W10_Lecture\GAME2012_W10_Lecture\Debug\FirstExample.exe
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(132,21): warning C4018: '<': signed/unsigned mismatch
+  FirstExample.vcxproj -> C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\Debug\FirstExample.exe
