@@ -12,5 +12,5 @@ C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExamp
               _Ty=GLfloat
           ]
 C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(133,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\02_CubeTexture.cpp(252,33): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\02_CubeTexture.cpp(275,33): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
   FirstExample.vcxproj -> C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\Debug\FirstExample.exe

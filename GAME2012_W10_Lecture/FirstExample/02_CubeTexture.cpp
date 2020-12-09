@@ -57,7 +57,7 @@ GLfloat pitch, yaw;
 int lastX, lastY;
 
 // Texture variables.
-GLuint brickTx, blankTx, grassTx, hedgeTx;
+GLuint brickTx, blankTx, grassTx, hedgeTx, gateTx;
 GLint width, height, bitDepth;
 
 void timer(int);
@@ -83,11 +83,20 @@ BackWall BWall;
 FrontWallR FWallR;
 FrontWallL FWallL;
 FrontWallM FWallM;
-//hedge maze
-OHedgeMazeF HMF;
-OHedgeMazeR HMR;
-OHedgeMazeL HML;
-OHedgeMazeB HMB;
+// gate
+Gate gate;
+//outer hedge maze
+OHedgeMazeF OHMF;
+OHedgeMazeR OHMR;
+OHedgeMazeL OHML;
+OHedgeMazeB OHMB;
+// inner hedge maze
+IHedgeMaze1 IHM1;
+IHedgeMaze2 IHM2;
+IHedgeMaze3 IHM3;
+IHedgeMaze4 IHM4;
+IHedgeMaze5 IHM5;
+
 //Prism g_prism(7);
 
 void init(void)
@@ -175,6 +184,20 @@ void init(void)
 	glGenerateMipmap(GL_TEXTURE_2D);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(image4);
+
+	unsigned char* image5 = stbi_load("gate.jpg", &width, &height, &bitDepth, 0);
+	if (!image5) cout << "Unable to load file!" << endl;
+
+	glGenTextures(1, &gateTx);
+	glBindTexture(GL_TEXTURE_2D, gateTx);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image5);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(image5);
 
 	glUniform1i(glGetUniformLocation(program, "texture0"), 0);
 
@@ -302,31 +325,69 @@ void display(void)
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, FWallL.NumIndices(), GL_UNSIGNED_SHORT, 0);
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//hedge maze below
-	glBindTexture(GL_TEXTURE_2D, hedgeTx);
-	HMF.ColorShape(1.0f, 0.9f, 0.65f);
-	HMF.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	glBindTexture(GL_TEXTURE_2D, gateTx);
+	gate.ColorShape(1.0f, 0.9f, 0.65f);
+	gate.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
-	glDrawElements(GL_TRIANGLES, HMF.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, gate.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	//gate^
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//outer hedge maze below
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	OHMF.ColorShape(1.0f, 0.9f, 0.65f);
+	OHMF.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, OHMF.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, hedgeTx);
-	HMR.ColorShape(1.0f, 0.9f, 0.65f);
-	HMR.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	OHMR.ColorShape(1.0f, 0.9f, 0.65f);
+	OHMR.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
-	glDrawElements(GL_TRIANGLES, HMR.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, OHMR.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, hedgeTx);
-	HML.ColorShape(1.0f, 0.9f, 0.65f);
-	HML.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	OHML.ColorShape(1.0f, 0.9f, 0.65f);
+	OHML.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
-	glDrawElements(GL_TRIANGLES, HML.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, OHML.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, hedgeTx);
-	HMB.ColorShape(1.0f, 0.9f, 0.65f);
-	HMB.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	OHMB.ColorShape(1.0f, 0.9f, 0.65f);
+	OHMB.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
-	glDrawElements(GL_TRIANGLES, HMB.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, OHMB.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	/// outer hedge maze^
+	/// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// inner hedge maze
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	IHM1.ColorShape(1.0f, 0.9f, 0.65f);
+	IHM1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, IHM1.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	IHM2.ColorShape(1.0f, 0.9f, 0.65f);
+	IHM2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, IHM2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	IHM3.ColorShape(1.0f, 0.9f, 0.65f);
+	IHM3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, IHM3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	IHM4.ColorShape(1.0f, 0.9f, 0.65f);
+	IHM4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, IHM4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	IHM5.ColorShape(1.0f, 0.9f, 0.65f);
+	IHM5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, IHM5.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 	glBindVertexArray(0); // Done writing.
 	glutSwapBuffers(); // Now for a potentially smoother render.
