@@ -73,14 +73,21 @@ void resetView()
 }
 
 // Shapes. Recommend putting in a map
+//ground
 Grid g_grid(10);
 Plane g_plane;
+//castle walls
 RightWall RWall;
 LeftWall LWall;
 BackWall BWall;
 FrontWallR FWallR;
 FrontWallL FWallL;
 FrontWallM FWallM;
+//hedge maze
+OHedgeMazeF HMF;
+OHedgeMazeR HMR;
+OHedgeMazeL HML;
+OHedgeMazeB HMB;
 //Prism g_prism(7);
 
 void init(void)
@@ -141,7 +148,7 @@ void init(void)
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(image2);
 
-	unsigned char* image3 = stbi_load("grass.jpg", &width, &height, &bitDepth, 0);
+	unsigned char* image3 = stbi_load("grass.png", &width, &height, &bitDepth, 0);
 	if (!image3) cout << "Unable to load file!" << endl;
 
 	glGenTextures(1, &grassTx);
@@ -155,7 +162,7 @@ void init(void)
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(image3);
 
-	unsigned char* image4 = stbi_load("hedge.jpg", &width, &height, &bitDepth, 0);
+	unsigned char* image4 = stbi_load("hedge.png", &width, &height, &bitDepth, 0);
 	if (!image4) cout << "Unable to load file!" << endl;
 
 	glGenTextures(1, &hedgeTx);
@@ -256,12 +263,9 @@ void display(void)
 	g_plane.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(10.0f, 10.0f, 1.0f), X_AXIS, -90.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 	glDrawElements(GL_TRIANGLES, g_plane.NumIndices(), GL_UNSIGNED_SHORT, 0);
-
-	/*glBindTexture(GL_TEXTURE_2D, grassTx);
-	g_plane.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
-	transformObject(glm::vec3(1.0f, 1.0f, 1.0f), X_AXIS, -90.0f, glm::vec3(0.0f, 0.0f, 0.0f));
-	glDrawElements(GL_LINE_STRIP, g_plane.NumIndices(), GL_UNSIGNED_SHORT, 0);*/
-
+	//grid and plane/ ground^
+	/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//castse walls
 	glBindTexture(GL_TEXTURE_2D, brickTx);
 	LWall.ColorShape(1.0f, 0.9f, 0.65f);
 	LWall.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
@@ -297,6 +301,31 @@ void display(void)
 	FWallL.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, FWallL.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//hedge maze below
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	HMF.ColorShape(1.0f, 0.9f, 0.65f);
+	HMF.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, HMF.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	HMR.ColorShape(1.0f, 0.9f, 0.65f);
+	HMR.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, HMR.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	HML.ColorShape(1.0f, 0.9f, 0.65f);
+	HML.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, HML.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	HMB.ColorShape(1.0f, 0.9f, 0.65f);
+	HMB.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, HMB.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 
 	glBindVertexArray(0); // Done writing.
