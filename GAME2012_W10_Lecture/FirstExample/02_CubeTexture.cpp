@@ -77,6 +77,8 @@ Grid g_grid(10);
 RightWall RWall;
 LeftWall LWall;
 BackWall BWall;
+FrontWallR FWallR;
+FrontWallL FWallL;
 //Prism g_prism(7);
 
 void init(void)
@@ -210,6 +212,8 @@ void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glClearColor(0.3, 0.8, 1.0, 1.0);
+
 	glBindVertexArray(vao);
 	// Draw all shapes.
 
@@ -235,6 +239,18 @@ void display(void)
 	BWall.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, BWall.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWallR.ColorShape(1.0f, 0.9f, 0.65f);
+	FWallR.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWallR.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWallL.ColorShape(1.0f, 0.9f, 0.65f);
+	FWallL.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWallL.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 
 	glBindVertexArray(0); // Done writing.
@@ -385,7 +401,7 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
 	glutSetOption(GLUT_MULTISAMPLE, 8);
 	glutInitWindowSize(1024, 1024);
-	glutCreateWindow("GAME2012 - Week 7");
+	glutCreateWindow("GAME2012_Final");
 
 	glewInit();	//Initializes the glew and prepares the drawing pipeline.
 	init();
