@@ -104,6 +104,8 @@
     <Image Include="alex.jpg" />
     <Image Include="blank.jpg" />
     <Image Include="brick.jpg" />
+    <Image Include="grass.png" />
+    <Image Include="hedge.png" />
     <Image Include="wook.png" />
   </ItemGroup>
   <ItemGroup>

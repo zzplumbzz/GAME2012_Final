@@ -57,7 +57,7 @@ GLfloat pitch, yaw;
 int lastX, lastY;
 
 // Texture variables.
-GLuint brickTx, blankTx;
+GLuint brickTx, blankTx, grassTx, hedgeTx;
 GLint width, height, bitDepth;
 
 void timer(int);
@@ -74,11 +74,13 @@ void resetView()
 
 // Shapes. Recommend putting in a map
 Grid g_grid(10);
+Plane g_plane;
 RightWall RWall;
 LeftWall LWall;
 BackWall BWall;
 FrontWallR FWallR;
 FrontWallL FWallL;
+FrontWallM FWallM;
 //Prism g_prism(7);
 
 void init(void)
@@ -138,6 +140,34 @@ void init(void)
 	glGenerateMipmap(GL_TEXTURE_2D);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(image2);
+
+	unsigned char* image3 = stbi_load("grass.jpg", &width, &height, &bitDepth, 0);
+	if (!image3) cout << "Unable to load file!" << endl;
+
+	glGenTextures(1, &grassTx);
+	glBindTexture(GL_TEXTURE_2D, grassTx);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image3);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(image3);
+
+	unsigned char* image4 = stbi_load("hedge.jpg", &width, &height, &bitDepth, 0);
+	if (!image4) cout << "Unable to load file!" << endl;
+
+	glGenTextures(1, &hedgeTx);
+	glBindTexture(GL_TEXTURE_2D, hedgeTx);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image4);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(image4);
 
 	glUniform1i(glGetUniformLocation(program, "texture0"), 0);
 
@@ -217,10 +247,20 @@ void display(void)
 	glBindVertexArray(vao);
 	// Draw all shapes.
 
-	glBindTexture(GL_TEXTURE_2D, blankTx);
+	glBindTexture(GL_TEXTURE_2D, grassTx);
 	g_grid.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(1.0f, 1.0f, 1.0f), X_AXIS, -90.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 	glDrawElements(GL_LINE_STRIP, g_grid.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, grassTx);
+	g_plane.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(10.0f, 10.0f, 1.0f), X_AXIS, -90.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	glDrawElements(GL_TRIANGLES, g_plane.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*glBindTexture(GL_TEXTURE_2D, grassTx);
+	g_plane.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 1.0f, 1.0f), X_AXIS, -90.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	glDrawElements(GL_LINE_STRIP, g_plane.NumIndices(), GL_UNSIGNED_SHORT, 0);*/
 
 	glBindTexture(GL_TEXTURE_2D, brickTx);
 	LWall.ColorShape(1.0f, 0.9f, 0.65f);
@@ -245,6 +285,12 @@ void display(void)
 	FWallR.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, FWallR.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWallM.ColorShape(1.0f, 0.9f, 0.65f);
+	FWallM.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWallM.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, brickTx);
 	FWallL.ColorShape(1.0f, 0.9f, 0.65f);

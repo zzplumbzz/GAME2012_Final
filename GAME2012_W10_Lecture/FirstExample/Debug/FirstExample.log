@@ -1,16 +1,16 @@
 ﻿  02_CubeTexture.cpp
 C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(53,21): warning C4018: '<': signed/unsigned mismatch
 C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(77,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(94,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
-          with
-          [
-              _Ty=GLfloat
-          ]
 C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(95,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
           with
           [
               _Ty=GLfloat
           ]
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(132,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\02_CubeTexture.cpp(215,33): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(96,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=GLfloat
+          ]
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\Shape.h(133,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\FirstExample\02_CubeTexture.cpp(245,33): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
   FirstExample.vcxproj -> C:\Users\nicol\Desktop\3D Grapics\GAME2012_Final\GAME2012_W10_Lecture\Debug\FirstExample.exe
