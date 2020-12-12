@@ -1,5 +1,4 @@
-﻿
-///////////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////////
 //
 // 01_CubeTexture.cpp
 //
@@ -11,6 +10,7 @@ using namespace std;
 #include <ctime>
 #include "vgl.h"
 #include "LoadShaders.h"
+#include "Light.h"
 #include "Shape.h"
 #include "glm\glm.hpp"
 #include "glm\gtc\matrix_transform.hpp"
@@ -29,11 +29,10 @@ using namespace std;
 #define YZ_AXIS glm::vec3(0,1,1)
 #define XZ_AXIS glm::vec3(1,0,1)
 
-
 enum keyMasks {
-	KEY_FORWARD =  0b00000001,		// 0x01 or 1 or 01
+	KEY_FORWARD = 0b00000001,		// 0x01 or 1 or 01
 	KEY_BACKWARD = 0b00000010,		// 0x02 or 2 or 02
-	KEY_LEFT = 0b00000100,		
+	KEY_LEFT = 0b00000100,
 	KEY_RIGHT = 0b00001000,
 	KEY_UP = 0b00010000,
 	KEY_DOWN = 0b00100000,
@@ -42,7 +41,7 @@ enum keyMasks {
 };
 
 // IDs.
-GLuint vao, ibo, points_vbo, colors_vbo, uv_vbo, mvp_ID;
+GLuint vao, ibo, points_vbo, colors_vbo, uv_vbo, modelID, viewID, projID;// mvp_ID;
 
 // Matrices.
 glm::mat4 MVP, View, Projection;
@@ -57,8 +56,16 @@ GLfloat pitch, yaw;
 int lastX, lastY;
 
 // Texture variables.
-GLuint brickTx, blankTx, grassTx, hedgeTx, gateTx;
+GLuint brickTx, blankTx, grassTx, hedgeTx, gateTx, castleTx;
 GLint width, height, bitDepth;
+
+//Light variables			Ambient colour		Ambient strength
+AmbientLight aLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f);
+
+PointLight pLights[2] = { { glm::vec3(7.5f, 1.0f, -10.0f), 10.0f, glm::vec3(1.0f, 1.0f, 0.0f), 10.0f }, //Yellow
+						  { glm::vec3(-1.5f, 1.0f, -5.0f), 10.0f, glm::vec3(0.0f, 0.0f, 5.0f), 10.0f } }; //Blue
+						 /* { glm::vec3(1.5f, 2.0f, -5.0f), 10.0f, glm::vec3(1.0f, 1.0f, 0.0f), 10.0f },
+						  { glm::vec3(8.0f, 2.0f, -1.0f), 10.0f, glm::vec3(1.0f, 0.5f, 0.0f), 10.0f } };*/
 
 void timer(int);
 
@@ -99,6 +106,24 @@ IHedgeMaze3 IHM3;
 IHedgeMaze4 IHM4;
 IHedgeMaze5 IHM5;
 
+//Back right prism
+TowerPrism BRP(12);
+//Front right prism
+TowerPrism FRP(12);
+//Front left prism
+TowerPrism FLP(12);
+//Back left prism
+TowerPrism BLP(12);
+
+//Back right cone
+TowerCone BRC(12);
+//Front right cone
+TowerCone FRC(12);
+//Back left cone
+TowerCone BLC(12);
+//Front left cone
+TowerCone FLC(12);
+
 //Prism g_prism(7);
 
 void init(void)
@@ -115,7 +140,10 @@ void init(void)
 	GLuint program = LoadShaders(shaders);
 	glUseProgram(program);	//My Pipeline is set up
 
-	mvp_ID = glGetUniformLocation(program, "MVP");
+	//mvp_ID = glGetUniformLocation(program, "MVP");
+	modelID = glGetUniformLocation(program, "model");
+	projID = glGetUniformLocation(program, "projection");
+	viewID = glGetUniformLocation(program, "view");
 
 	// Projection matrix : 45∞ Field of View, aspect ratio, display range : 0.1 unit <-> 100 units
 	Projection = glm::perspective(glm::radians(45.0f), 1.0f / 1.0f, 0.1f, 100.0f);
@@ -144,10 +172,10 @@ void init(void)
 	stbi_image_free(image);
 
 	// Second texture. Blank one.
-	
+
 	unsigned char* image2 = stbi_load("blank.jpg", &width, &height, &bitDepth, 0);
 	if (!image2) cout << "Unable to load file!" << endl;
-	
+
 	glGenTextures(1, &blankTx);
 	glBindTexture(GL_TEXTURE_2D, blankTx);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
@@ -201,23 +229,55 @@ void init(void)
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(image5);
 
+	unsigned char* image6 = stbi_load("castle.jpg", &width, &height, &bitDepth, 0);
+	if (!image6) cout << "Unable to load file!" << endl;
+
+	glGenTextures(1, &castleTx);
+	glBindTexture(GL_TEXTURE_2D, castleTx);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image6);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(image6);
+
 	glUniform1i(glGetUniformLocation(program, "texture0"), 0);
+
+	// Setting ambient Light.
+	glUniform3f(glGetUniformLocation(program, "aLight.ambientColour"), aLight.ambientColour.x, aLight.ambientColour.y, aLight.ambientColour.z);
+	glUniform1f(glGetUniformLocation(program, "aLight.ambientStrength"), aLight.ambientStrength);
+
+	// Setting point lights.
+	glUniform3f(glGetUniformLocation(program, "pLights[0].base.diffuseColour"), pLights[0].diffuseColour.x, pLights[0].diffuseColour.y, pLights[0].diffuseColour.z);
+	glUniform1f(glGetUniformLocation(program, "pLights[0].base.diffuseStrength"), pLights[0].diffuseStrength);
+	glUniform3f(glGetUniformLocation(program, "pLights[0].position"), pLights[0].position.x, pLights[0].position.y, pLights[0].position.z);
+	glUniform1f(glGetUniformLocation(program, "pLights[0].constant"), pLights[0].constant);
+	glUniform1f(glGetUniformLocation(program, "pLights[0].linear"), pLights[0].linear);
+	glUniform1f(glGetUniformLocation(program, "pLights[0].exponent"), pLights[0].exponent);
+
+	glUniform3f(glGetUniformLocation(program, "pLights[1].base.diffuseColour"), pLights[1].diffuseColour.x, pLights[1].diffuseColour.y, pLights[1].diffuseColour.z);
+	glUniform1f(glGetUniformLocation(program, "pLights[1].base.diffuseStrength"), pLights[1].diffuseStrength);
+	glUniform3f(glGetUniformLocation(program, "pLights[1].position"), pLights[1].position.x, pLights[1].position.y, pLights[1].position.z);
+	glUniform1f(glGetUniformLocation(program, "pLights[1].constant"), pLights[1].constant);
+	glUniform1f(glGetUniformLocation(program, "pLights[1].linear"), pLights[1].linear);
+	glUniform1f(glGetUniformLocation(program, "pLights[1].exponent"), pLights[1].exponent);
 
 	vao = 0;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-		ibo = 0;
-		glGenBuffers(1, &ibo);
-	
-		points_vbo = 0;
-		glGenBuffers(1, &points_vbo);
+	ibo = 0;
+	glGenBuffers(1, &ibo);
 
-		colors_vbo = 0;
-		glGenBuffers(1, &colors_vbo);
+	points_vbo = 0;
+	glGenBuffers(1, &points_vbo);
 
-		uv_vbo = 0;
-		glGenBuffers(1, &uv_vbo);
+	colors_vbo = 0;
+	glGenBuffers(1, &colors_vbo);
+
+	uv_vbo = 0;
+	glGenBuffers(1, &uv_vbo);
 
 	glBindVertexArray(0); // Can optionally unbind the vertex array to avoid modification.
 
@@ -227,7 +287,9 @@ void init(void)
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 
-	timer(0); 
+	glEnable(GL_BLEND);
+
+	timer(0);
 }
 
 //---------------------------------------------------------------------
@@ -259,11 +321,14 @@ void transformObject(glm::vec3 scale, glm::vec3 rotationAxis, float rotationAngl
 	Model = glm::translate(Model, translation);
 	Model = glm::rotate(Model, glm::radians(rotationAngle), rotationAxis);
 	Model = glm::scale(Model, scale);
-	
+
 	calculateView();
-	
+
 	MVP = Projection * View * Model;
-	glUniformMatrix4fv(mvp_ID, 1, GL_FALSE, &MVP[0][0]);
+	/*glUniformMatrix4fv(mvp_ID, 1, GL_FALSE, &MVP[0][0]);*/
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &Model[0][0]);
+	glUniformMatrix4fv(viewID, 1, GL_FALSE, &View[0][0]);
+	glUniformMatrix4fv(projID, 1, GL_FALSE, &Projection[0][0]);
 }
 
 //---------------------------------------------------------------------
@@ -391,6 +456,56 @@ void display(void)
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, IHM5.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
+	/// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Tower prism
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	//BRP.ColorShape(1.0f, 0.9f, 0.65f);
+	BRP.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 2.5f, 1.0f), X_AXIS, 0.0f, glm::vec3(9.7f, 0.0f, -10.9f));
+	glDrawElements(GL_TRIANGLES, BRP.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	FRP.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 2.5f, 1.0f), X_AXIS, 0.0f, glm::vec3(9.7f, 0.0f, -0.2f));
+	glDrawElements(GL_TRIANGLES, FRP.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	FLP.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 2.5f, 1.0f), X_AXIS, 0.0f, glm::vec3(-0.8f, 0.0f, -0.2f));
+	glDrawElements(GL_TRIANGLES, FLP.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	BLP.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 2.5f, 1.0f), X_AXIS, 0.0f, glm::vec3(-0.8f, 0.0f, -10.9f));
+	glDrawElements(GL_TRIANGLES, BLP.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, castleTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	BRC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(9.45f, 2.5f, -11.15f));
+	glDrawElements(GL_TRIANGLES, BRC.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, castleTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	FRC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(9.45f, 2.5f, -0.45f));
+	glDrawElements(GL_TRIANGLES, FRC.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, castleTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	BLC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(-1.05f, 2.5f, -11.15f));
+	glDrawElements(GL_TRIANGLES, BLC.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, castleTx);
+	//.ColorShape(1.0f, 0.9f, 0.65f);
+	FLC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(-1.05f, 2.5f, -0.45f));
+	glDrawElements(GL_TRIANGLES, FLC.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
 	glBindVertexArray(0); // Done writing.
 	glutSwapBuffers(); // Now for a potentially smoother render.
 }
@@ -414,7 +529,7 @@ void parseKeys()
 void timer(int) { // essentially our update()
 	parseKeys();
 	glutPostRedisplay();
-	glutTimerFunc(1000/FPS, timer, 0); // 60 FPS or 16.67ms.
+	glutTimerFunc(1000 / FPS, timer, 0); // 60 FPS or 16.67ms.
 }
 
 //---------------------------------------------------------------------
@@ -552,7 +667,7 @@ int main(int argc, char** argv)
 
 	glutMouseFunc(mouseClick);
 	glutMotionFunc(mouseMove); // Requires click to register.
-	
+
 	atexit(clean); // This GLUT function calls specified function before terminating program. Useful!
 
 	glutMainLoop();

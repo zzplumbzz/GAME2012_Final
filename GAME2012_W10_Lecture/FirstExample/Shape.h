@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include "glm\glm.hpp"
 #define PI 3.14159265358979324
 using namespace std;
 
@@ -11,6 +12,7 @@ struct Shape
 	vector<GLfloat> shape_vertices;
 	vector<GLfloat> shape_colors;
 	vector<GLfloat> shape_uvs;
+	vector<GLfloat> shape_normals;
 
 	~Shape()
 	{
@@ -37,14 +39,14 @@ struct Shape
 			glBindBuffer(GL_ARRAY_BUFFER, *colors_vbo);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(shape_colors[0]) * shape_colors.size(), &shape_colors.front(), GL_STATIC_DRAW);
 			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glEnableVertexAttribArray(1);	
+			glEnableVertexAttribArray(1);
 
 			glBindBuffer(GL_ARRAY_BUFFER, *uv_vbo);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(shape_uvs[0]) * shape_uvs.size(), &shape_uvs.front(), GL_STATIC_DRAW);
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(2);
 
-			glBindBuffer(GL_ARRAY_BUFFER, 0); 
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	void ColorShape(GLfloat r, GLfloat g, GLfloat b)
 	{
@@ -58,6 +60,37 @@ struct Shape
 		}
 		shape_colors.shrink_to_fit(); // Good idea after a bunch of pushes.
 	}
+	void CalcAverageNormals(vector<GLshort>& indices, unsigned indiceCount, vector<GLfloat>& vertices,
+		unsigned verticeCount)
+	{
+		// Popular shape_normals so we can use [].
+		for (int i = 0; i < verticeCount; i++)
+			shape_normals.push_back(0);
+		shape_normals.shrink_to_fit();
+		// Calculate the normals of each triangle first.
+		for (unsigned i = 0; i < indiceCount; i += 3)
+		{
+			unsigned int in0 = indices[i] * 3;
+			unsigned int in1 = indices[i + 1] * 3;
+			unsigned int in2 = indices[i + 2] * 3;
+			glm::vec3 v1(vertices[in1] - vertices[in0], vertices[in1 + 1] - vertices[in0 + 1], vertices[in1 + 2] - vertices[in0 + 2]);
+			glm::vec3 v2(vertices[in2] - vertices[in0], vertices[in2 + 1] - vertices[in0 + 1], vertices[in2 + 2] - vertices[in0 + 2]);
+			glm::vec3 normal = glm::cross(v2, v1);
+			normal = glm::normalize(normal); // Finally becomes a unit vector.
+
+			// Now populate the normal values for each vertex of the triangle.
+			shape_normals[in0] += normal.x;	shape_normals[in0 + 1] += normal.y;	shape_normals[in0 + 2] += normal.z;
+			shape_normals[in1] += normal.x;	shape_normals[in1 + 1] += normal.y;	shape_normals[in1 + 2] += normal.z;
+			shape_normals[in2] += normal.x;	shape_normals[in2 + 1] += normal.y;	shape_normals[in2 + 2] += normal.z;
+		}
+		// Normalize each of the new normal vectors.
+		for (unsigned i = 0; i < shape_normals.size(); i += 3)
+		{
+			glm::vec3 vec(shape_normals[i], shape_normals[i + 1], shape_normals[i + 2]);
+			vec = glm::normalize(vec);
+			shape_normals[i] = vec.x; shape_normals[i + 1] = vec.y; shape_normals[i + 2] = vec.z;
+		}
+	}
 };
 
 struct Plane : public Shape // Vertical plane of 1x1 units across.
@@ -70,8 +103,8 @@ struct Plane : public Shape // Vertical plane of 1x1 units across.
 		};
 		shape_vertices = {
 			0.0f, 0.0f, 0.0f,
-			1.0f, 0.0f, 0.0f,		
-			1.0f, 1.0f, 0.0f,		
+			1.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f,
 			0.0f, 1.0f, 0.0f
 		};
 		for (int i = 0; i < shape_vertices.size(); i += 3)
@@ -142,7 +175,7 @@ struct RightWall : public Shape
 {
 	RightWall()
 	{
-		
+
 		shape_indices = {
 			// Front.
 			0, 1, 2,
@@ -235,7 +268,7 @@ struct LeftWall : public Shape
 {
 	LeftWall()
 	{
-		
+
 		shape_indices = {
 			// Front.
 			0, 1, 2,
@@ -328,7 +361,7 @@ struct BackWall : public Shape
 {
 	BackWall()
 	{
-		
+
 		shape_indices = {
 			// Front.
 			0, 1, 2,
@@ -366,13 +399,13 @@ struct BackWall : public Shape
 			-0.5f, 1.0f, -3.3f,		// 7. 10
 			1.5f, 1.0f, -3.3f,		// 6. 11
 			// Left.
-			-0.5f, 0.0f, -3.25f,		// 1. 4		
+			-0.5f, 0.0f, -3.25f,		// 1. 4
 			-0.5f, 0.0f, -3.3f,		// 5. 5		Z was 0
 			-0.5f, 1.0f, -3.3f,		// 6. 6		Z was 0
-			-0.5f, 1.0f, -3.25f,		// 2. 7		
+			-0.5f, 1.0f, -3.25f,		// 2. 7
 			// Top.
 			-0.5f, 1.0f, -3.3f,		// 7. 16  Z was 0
-			-0.5f, 1.0f, -3.25f,		// 3. 17  
+			-0.5f, 1.0f, -3.25f,		// 3. 17
 			1.5f, 1.0f, -3.25f,		// 2. 18
 			1.5f, 1.0f, -3.3f,		// 6. 19	Z was 0
 			// Bottom.
@@ -459,13 +492,13 @@ struct FrontWallL : public Shape
 			-0.5f, 1.0f, 1.7f,		// 7. 10
 			0.4f, 1.0f, 1.7f,		// 6. 11
 			// Left.
-			-0.5f, 0.0f, 1.7f,		// 1. 4		
+			-0.5f, 0.0f, 1.7f,		// 1. 4
 			-0.5f, 0.0f, 1.75f,		// 5. 5		Z was 0
 			-0.5f, 1.0f, 1.75f,		// 6. 6		Z was 0
-			-0.5f, 1.0f, 1.7f,		// 2. 7		
+			-0.5f, 1.0f, 1.7f,		// 2. 7
 			// Top.
 			-0.5f, 1.0f, 1.7f,		// 7. 16  Z was 0
-			-0.5f, 1.0f, 1.75f,		// 3. 17  
+			-0.5f, 1.0f, 1.75f,		// 3. 17
 			0.4f, 1.0f, 1.75f,		// 2. 18
 			0.4f, 1.0f, 1.7f,		// 6. 19	Z was 0
 			// Bottom.
@@ -552,13 +585,13 @@ struct FrontWallR : public Shape
 			0.6f, 1.0f, 1.7f,		// 7. 10
 			1.5f, 1.0f, 1.7f,		// 6. 11
 			// Left.
-			0.6f, 0.0f, 1.7f,		// 1. 4		
+			0.6f, 0.0f, 1.7f,		// 1. 4
 			0.6f, 0.0f, 1.75f,		// 5. 5		Z was 0
 			0.6f, 1.0f, 1.75f,		// 6. 6		Z was 0
-			0.6f, 1.0f, 1.7f,		// 2. 7		
+			0.6f, 1.0f, 1.7f,		// 2. 7
 			// Top.
 			0.6f, 1.0f, 1.7f,		// 7. 16  Z was 0
-			0.6f, 1.0f, 1.75f,		// 3. 17  
+			0.6f, 1.0f, 1.75f,		// 3. 17
 			1.5f, 1.0f, 1.75f,		// 2. 18
 			1.5f, 1.0f, 1.7f,		// 6. 19	Z was 0
 			// Bottom.
@@ -645,13 +678,13 @@ struct FrontWallM : public Shape
 			0.4f, 1.0f, 1.7f,		// 7. 10
 			0.6f, 1.0f, 1.7f,		// 6. 11
 			// Left.
-			0.4f, 0.7f, 1.7f,		// 1. 4		
+			0.4f, 0.7f, 1.7f,		// 1. 4
 			0.4f, 0.7f, 1.75f,		// 5. 5		Z was 0
 			0.4f, 1.0f, 1.75f,		// 6. 6		Z was 0
-			0.4f, 1.0f, 1.7f,		// 2. 7		
+			0.4f, 1.0f, 1.7f,		// 2. 7
 			// Top.
 			0.4f, 1.0f, 1.7f,		// 7. 16  Z was 0
-			0.4f, 1.0f, 1.75f,		// 3. 17  
+			0.4f, 1.0f, 1.75f,		// 3. 17
 			0.6f, 1.0f, 1.75f,		// 2. 18
 			0.6f, 1.0f, 1.7f,		// 6. 19	Z was 0
 			// Bottom.
@@ -835,13 +868,13 @@ struct Gate : public Shape
 			0.4f, 0.7f, 1.7f,		// 7. 10
 			0.6f, 0.7f, 1.7f,		// 6. 11
 			// Left.
-			0.4f, 0.0f, 1.7f,		// 1. 4		
+			0.4f, 0.0f, 1.7f,		// 1. 4
 			0.4f, 0.0f, 1.75f,		// 5. 5		Z was 0
 			0.4f, 0.7f, 1.75f,		// 6. 6		Z was 0
-			0.4f, 0.7f, 1.7f,		// 2. 7		
+			0.4f, 0.7f, 1.7f,		// 2. 7
 			// Top.
 			0.4f, 0.7f, 1.7f,		// 7. 16  Z was 0
-			0.4f, 0.7f, 1.75f,		// 3. 17  
+			0.4f, 0.7f, 1.75f,		// 3. 17
 			0.6f, 0.7f, 1.75f,		// 2. 18
 			0.6f, 0.7f, 1.7f,		// 6. 19	Z was 0
 			// Bottom.
@@ -929,13 +962,13 @@ struct OHedgeMazeF : public Shape
 			-0.3f, 0.3f, 0.0f,		// 7. 10
 			1.15f, 0.3f, 0.0f,		// 6. 11
 			// Left.
-			-0.3f, 0.0f, 0.0f,		// 1. 4		
+			-0.3f, 0.0f, 0.0f,		// 1. 4
 			-0.3f, 0.0f, 0.15f,		// 5. 5		Z was 0
 			-0.3f, 0.3f, 0.15f,		// 6. 6		Z was 0
-			-0.3f, 0.3f, 0.0f,		// 2. 7		
+			-0.3f, 0.3f, 0.0f,		// 2. 7
 			// Top.
 			-0.3f, 0.3f, 0.0f,		// 7. 16  Z was 0
-			-0.3f, 0.3f, 0.15f,		// 3. 17  
+			-0.3f, 0.3f, 0.15f,		// 3. 17
 			1.15f, 0.3f, 0.15f,		// 2. 18
 			1.15f, 0.3f, 0.0f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1022,13 +1055,13 @@ struct OHedgeMazeR : public Shape
 			1.2f, 0.3f, -2.9f,		// 7. 10
 			1.25f, 0.3f, -2.9f,		// 6. 11
 			// Left.
-			1.2f, 0.0f, -2.9f,		// 1. 4		
+			1.2f, 0.0f, -2.9f,		// 1. 4
 			1.2f, 0.0f, 0.15f,		// 5. 5		Z was 0
 			1.2f, 0.3f, 0.15f,		// 6. 6		Z was 0
-			1.2f, 0.3f, -2.9f,		// 2. 7		
+			1.2f, 0.3f, -2.9f,		// 2. 7
 			// Top.
 			1.2f, 0.3f, -2.9f,		// 7. 16  Z was 0
-			1.2f, 0.3f, 0.15f,		// 3. 17  
+			1.2f, 0.3f, 0.15f,		// 3. 17
 			1.25f, 0.3f, 0.15f,		// 2. 18
 			1.25f, 0.3f, -2.9f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1115,13 +1148,13 @@ struct OHedgeMazeL : public Shape
 			-0.3f, 0.3f, -2.9f,		// 7. 10
 			-0.25f, 0.3f, -2.9f,		// 6. 11
 			// Left.
-			-0.3f, 0.0f, -2.9f,		// 1. 4		
+			-0.3f, 0.0f, -2.9f,		// 1. 4
 			-0.3f, 0.0f, 0.15f,		// 5. 5		Z was 0
 			-0.3f, 0.3f, 0.15f,		// 6. 6		Z was 0
-			-0.3f, 0.3f, -2.9f,		// 2. 7		
+			-0.3f, 0.3f, -2.9f,		// 2. 7
 			// Top.
 			-0.3f, 0.3f, -2.9f,		// 7. 16  Z was 0
-			-0.3f, 0.3f, 0.15f,		// 3. 17  
+			-0.3f, 0.3f, 0.15f,		// 3. 17
 			-0.25f, 0.3f, 0.15f,		// 2. 18
 			-0.25f, 0.3f, -2.9f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1208,13 +1241,13 @@ struct OHedgeMazeB : public Shape
 			-0.3f, 0.3f, -2.9f,		// 7. 10
 			1.25f, 0.3f, -2.9f,		// 6. 11
 			// Left.
-			-0.3f, 0.0f, -2.9f,		// 1. 4		
+			-0.3f, 0.0f, -2.9f,		// 1. 4
 			-0.3f, 0.0f, -2.85f,		// 5. 5		Z was 0
 			-0.3f, 0.3f, -2.85f,		// 6. 6		Z was 0
-			-0.3f, 0.3f, -2.9f,		// 2. 7		
+			-0.3f, 0.3f, -2.9f,		// 2. 7
 			// Top.
 			-0.3f, 0.3f, -2.9f,		// 7. 16  Z was 0
-			-0.3f, 0.3f, -2.85f,		// 3. 17  
+			-0.3f, 0.3f, -2.85f,		// 3. 17
 			1.25f, 0.3f, -2.85f,		// 2. 18
 			1.25f, 0.3f, -2.9f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1303,13 +1336,13 @@ struct IHedgeMaze1 : public Shape
 			-0.1f, 0.3f, -2.5f,		// 7. 10
 			-0.05f, 0.3f, -2.5f,		// 6. 11
 			// Left.
-			-0.05f, 0.0f, -0.2f,		// 1. 4		
+			-0.05f, 0.0f, -0.2f,		// 1. 4
 			-0.05f, 0.0f, -2.5f,		// 5. 5		Z was 0
 			-0.05f, 0.3f, -2.5f,		// 6. 6		Z was 0
-			-0.05f, 0.3f, -0.2f,		// 2. 7		
+			-0.05f, 0.3f, -0.2f,		// 2. 7
 			// Top.
 			-0.1f, 0.3f, -2.5f,		// 7. 16  Z was 0
-			-0.1f, 0.3f, -0.2f,		// 3. 17  
+			-0.1f, 0.3f, -0.2f,		// 3. 17
 			-0.05f, 0.3f, -0.2f,		// 2. 18
 			-0.05f, 0.3f, -2.5f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1396,13 +1429,13 @@ struct IHedgeMaze2 : public Shape
 			0.4f, 0.3f, -2.5f,		// 7. 10
 			0.45f, 0.3f, -2.5f,		// 6. 11
 			// Left.
-			0.45f, 0.0f, -0.2f,		// 1. 4		
+			0.45f, 0.0f, -0.2f,		// 1. 4
 			0.45f, 0.0f, -2.5f,		// 5. 5		Z was 0
 			0.45f, 0.3f, -2.5f,		// 6. 6		Z was 0
-			0.45f, 0.3f, -0.2f,		// 2. 7		
+			0.45f, 0.3f, -0.2f,		// 2. 7
 			// Top.
 			0.4f, 0.3f, -2.5f,		// 7. 16  Z was 0
-			0.4f, 0.3f, -0.2f,		// 3. 17  
+			0.4f, 0.3f, -0.2f,		// 3. 17
 			0.45f, 0.3f, -0.2f,		// 2. 18
 			0.45f, 0.3f, -2.5f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1489,13 +1522,13 @@ struct IHedgeMaze3 : public Shape
 			0.6f, 0.3f, -2.5f,		// 7. 10
 			0.65f, 0.3f, -2.5f,		// 6. 11
 			// Left.
-			0.65f, 0.0f, -0.2f,		// 1. 4		
+			0.65f, 0.0f, -0.2f,		// 1. 4
 			0.65f, 0.0f, -2.5f,		// 5. 5		Z was 0
 			0.65f, 0.3f, -2.5f,		// 6. 6		Z was 0
-			0.65f, 0.3f, -0.2f,		// 2. 7		
+			0.65f, 0.3f, -0.2f,		// 2. 7
 			// Top.
 			0.6f, 0.3f, -2.5f,		// 7. 16  Z was 0
-			0.6f, 0.3f, -0.2f,		// 3. 17  
+			0.6f, 0.3f, -0.2f,		// 3. 17
 			0.65f, 0.3f, -0.2f,		// 2. 18
 			0.65f, 0.3f, -2.5f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1582,13 +1615,13 @@ struct IHedgeMaze4 : public Shape
 			0.45f, 0.3f, -1.1f,		// 7. 10
 			-0.1f, 0.3f, -1.1f,		// 6. 11
 			// Left.
-			0.65f, 0.0f, -0.2f,		// 1. 4		
+			0.65f, 0.0f, -0.2f,		// 1. 4
 			0.65f, 0.0f, -2.5f,		// 5. 5		Z was 0
 			0.65f, 0.3f, -2.5f,		// 6. 6		Z was 0
-			0.65f, 0.3f, -0.2f,		// 2. 7		
+			0.65f, 0.3f, -0.2f,		// 2. 7
 			// Top.
 			-0.05f, 0.3f, -1.2f,		// 7. 16  Z was 0
-			-0.05f, 0.3f, -1.1f,		// 3. 17  
+			-0.05f, 0.3f, -1.1f,		// 3. 17
 			0.4f, 0.3f, -1.1f,		// 2. 18
 			0.4f, 0.3f, -1.2f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1675,13 +1708,13 @@ struct IHedgeMaze5 : public Shape
 			0.65f, 0.3f, -0.3f,		// 7. 10
 			1.05f, 0.3f, -0.3f,		// 6. 11
 			// Left.
-			0.65f, 0.0f, -0.2f,		// 1. 4		
+			0.65f, 0.0f, -0.2f,		// 1. 4
 			0.65f, 0.0f, -2.5f,		// 5. 5		Z was 0
 			0.65f, 0.3f, -2.5f,		// 6. 6		Z was 0
-			0.65f, 0.3f, -0.2f,		// 2. 7		
+			0.65f, 0.3f, -0.2f,		// 2. 7
 			// Top.
 			0.65f, 0.3f, -0.3f,		// 7. 16  Z was 0
-			0.65f, 0.3f, -0.2f,		// 3. 17  
+			0.65f, 0.3f, -0.2f,		// 3. 17
 			1.05f, 0.3f, -0.2f,		// 2. 18
 			1.05f, 0.3f, -0.3f,		// 6. 19	Z was 0
 			// Bottom.
@@ -1723,5 +1756,162 @@ struct IHedgeMaze5 : public Shape
 			0.0f, 1.0f		// 0.
 		};
 		ColorShape(1.0f, 1.0f, 1.0f);
+	}
+};
+
+struct TowerPrism : public Shape
+{
+	TowerPrism(int sides)
+	{
+		float theta = 0.0f;
+		// Top face.
+		shape_vertices.push_back(0.5f);
+		shape_vertices.push_back(1.0f);
+		shape_vertices.push_back(0.5f);
+		for (int i = 0; i < sides; ++i)
+		{
+			shape_vertices.push_back(0.5f + 0.5f * cos(theta));
+			shape_vertices.push_back(1.0f);
+			shape_vertices.push_back(0.5f + 0.5f * sin(theta));
+			theta += 2 * PI / sides;
+		}
+		// Bottom face.
+		shape_vertices.push_back(0.5f);
+		shape_vertices.push_back(0.0f);
+		shape_vertices.push_back(0.5f);
+		for (int i = 0; i < sides; ++i)
+		{
+			shape_vertices.push_back(0.5f + 0.5f * cos(theta));
+			shape_vertices.push_back(0.0f);
+			shape_vertices.push_back(0.5f + 0.5f * sin(theta));
+			theta += 2 * PI / sides;
+		}
+		// Indices now.
+		// Bottom face.
+		for (int i = sides + 1; i < sides * 2; i++)
+		{
+			shape_indices.push_back(sides + 1);
+			shape_indices.push_back(i + 1);
+			shape_indices.push_back(i + 2);
+		}
+		shape_indices.push_back(sides + 1);
+		shape_indices.push_back(sides * 2 + 1);
+		shape_indices.push_back(sides + 2);
+		// Middle faces.
+		for (int i = 1; i < sides; i++)
+		{
+			// Triangle one.
+			shape_indices.push_back(i);
+			shape_indices.push_back(i + 1);
+			shape_indices.push_back(sides + i + 2);
+			// Triangle two.
+			shape_indices.push_back(sides + i + 2);
+			shape_indices.push_back(sides + i + 1);
+			shape_indices.push_back(i);
+		}
+		shape_indices.push_back(sides);
+		shape_indices.push_back(1);
+		shape_indices.push_back(sides + 2);
+		shape_indices.push_back(sides + 2);
+		shape_indices.push_back(sides * 2 + 1);
+		shape_indices.push_back(sides);
+		// Top face.
+		for (int i = 1; i < sides; i++)
+		{
+			shape_indices.push_back(0);
+			shape_indices.push_back(i + 1);
+			shape_indices.push_back(i);
+		}
+		shape_indices.push_back(0);
+		shape_indices.push_back(1);
+		shape_indices.push_back(sides);
+		//for (int i = 0; i < shape_vertices.size(); i += 3)
+		//{
+		//	shape_uvs.push_back(0); // No texture for grid so value doesn't matter.
+		//	shape_uvs.push_back(0);
+		//}
+		shape_uvs = {
+			// Front.
+			0.0f, 0.0f, 	// 0.
+			6.0f, 0.0f, 	// 1.
+			6.0f, 3.0f, 	// 2.
+			0.0f, 3.0f,		// 3.
+			// Right.
+			0.0f, 0.0f, 	// 1.
+			3.0f, 0.0f, 	// 5.
+			3.0f, 3.0f, 	// 6.
+			0.0f, 3.0f,		// 2.
+			// Back.
+			0.0f, 0.0f, 	// 5.
+			6.0f, 0.0f, 	// 4.
+			6.0f, 3.0f,		// 7.
+			0.0f, 3.0f,		// 6.
+			// Left.
+			0.0f, 0.0f,		// 4.
+			3.0f, 0.0f,		// 0.
+			3.0f, 3.0f,		// 3.
+			0.0f, 3.0f,		// 7.
+			// Top.
+			0.0f, 0.0f,		// 7.
+			3.0f, 0.0f,		// 3.
+			3.0f, 3.0f,		// 2.
+			0.0f, 3.0f,		// 6.
+			// Bottom.
+			0.0f, 0.0f,		// 4.
+			3.0f, 0.0f,		// 5.
+			3.0f, 3.0f,		// 1.
+			0.0f, 3.0f	// 0.
+		};
+
+		ColorShape(1.0f, 0.9f, 0.65f);
+		CalcAverageNormals(shape_indices, shape_indices.size(), shape_vertices, shape_vertices.size());
+	}
+};
+
+struct TowerCone : public Shape
+{
+	TowerCone(int sides)
+	{
+		float theta = 0.0f;
+		// Bottom face.
+		shape_vertices.push_back(0.5f);
+		shape_vertices.push_back(0.0f);
+		shape_vertices.push_back(0.5f);
+		for (int i = 0; i < sides; ++i)
+		{
+			shape_vertices.push_back(0.5f + 0.5f * cos(theta));
+			shape_vertices.push_back(0.0f);
+			shape_vertices.push_back(0.5f + 0.5f * sin(theta));
+			theta += 2 * PI / sides;
+		}
+		shape_vertices.push_back(0.5f);
+		shape_vertices.push_back(1.0f);
+		shape_vertices.push_back(0.5f);
+		// Indices now. Bottom face.
+		for (int i = 1; i < sides; i++)
+		{
+			shape_indices.push_back(0);
+			shape_indices.push_back(i);
+			shape_indices.push_back(i + 1);
+		}
+		shape_indices.push_back(0);
+		shape_indices.push_back(sides);
+		shape_indices.push_back(1);
+		// Middle faces.
+		for (int i = 1; i < sides; i++)
+		{
+			shape_indices.push_back(i);
+			shape_indices.push_back(sides + 1);
+			shape_indices.push_back(i + 1);
+		}
+		shape_indices.push_back(sides);
+		shape_indices.push_back(sides + 1);
+		shape_indices.push_back(1);
+		for (int i = 0; i < shape_vertices.size(); i += 3)
+		{
+			shape_uvs.push_back(0); // No texture for grid so value doesn't matter.
+			shape_uvs.push_back(0);
+		}
+		ColorShape(0.0f, 10.0f, 1.0f);
 	}
 };
