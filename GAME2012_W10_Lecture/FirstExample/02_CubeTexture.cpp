@@ -83,6 +83,8 @@ BackWall BWall;
 FrontWallR FWallR;
 FrontWallL FWallL;
 FrontWallM FWallM;
+//parapets
+FrontWallParapet1 FWP1;
 // gate
 Gate gate;
 //outer hedge maze
