@@ -130,6 +130,10 @@ IHedgeMaze3 IHM3;
 IHedgeMaze4 IHM4;
 IHedgeMaze5 IHM5;
 
+//mid maze square
+MidMazeSquare MMS;
+
+
 //Back right prism
 TowerPrism BRP(12);
 //Front right prism
@@ -147,6 +151,7 @@ TowerCone FRC(12);
 TowerCone BLC(12);
 //Front left cone
 TowerCone FLC(12);
+
 
 //Prism g_prism(7);
 
@@ -605,6 +610,12 @@ void display(void)
 	IHM5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, IHM5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	MMS.ColorShape(1.0f, 0.9f, 0.65f);
+	MMS.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, MMS.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
 	/// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Tower prism
