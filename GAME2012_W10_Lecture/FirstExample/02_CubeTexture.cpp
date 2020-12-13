@@ -56,16 +56,14 @@ GLfloat pitch, yaw;
 int lastX, lastY;
 
 // Texture variables.
-GLuint brickTx, blankTx, grassTx, hedgeTx, gateTx, castleTx;
+GLuint brickTx, blankTx, grassTx, hedgeTx, gateTx, gatetowerTx, stoneTx, woodTx;
 GLint width, height, bitDepth;
 
 //Light variables			Ambient colour		Ambient strength
 AmbientLight aLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f);
 
 PointLight pLights[2] = { { glm::vec3(7.5f, 1.0f, -10.0f), 10.0f, glm::vec3(1.0f, 1.0f, 0.0f), 10.0f }, //Yellow
-						  { glm::vec3(-1.5f, 1.0f, -5.0f), 10.0f, glm::vec3(0.0f, 0.0f, 5.0f), 10.0f } }; //Blue
-						 /* { glm::vec3(1.5f, 2.0f, -5.0f), 10.0f, glm::vec3(1.0f, 1.0f, 0.0f), 10.0f },
-						  { glm::vec3(8.0f, 2.0f, -1.0f), 10.0f, glm::vec3(1.0f, 0.5f, 0.0f), 10.0f } };*/
+						  { glm::vec3(-3.5f, 1.0f, -5.0f), 10.0f, glm::vec3(0.0f, 0.0f, 5.0f), 10.0f } }; //Blue
 
 void timer(int);
 
@@ -92,8 +90,45 @@ FrontWallL FWallL;
 FrontWallM FWallM;
 //parapets
 FrontWallParapet1 FWP1;
+FrontWallParapet2 FWP2;
+FrontWallParapet3 FWP3;
+FrontWallParapet4 FWP4;
+FrontWallParapet5 FWP5;
+
+LeftWallParapet1 LWP1;
+LeftWallParapet2 LWP2;
+LeftWallParapet3 LWP3;
+LeftWallParapet4 LWP4;
+LeftWallParapet5 LWP5;
+
+BackWallParapet1 BWP1;
+BackWallParapet2 BWP2;
+BackWallParapet3 BWP3;
+BackWallParapet4 BWP4;
+BackWallParapet5 BWP5;
+
+RightWallParapet1 RWP1;
+RightWallParapet2 RWP2;
+RightWallParapet3 RWP3;
+RightWallParapet4 RWP4;
+RightWallParapet5 RWP5;
+
+//Gate house parapet
+FrontWallParapet1 GHP1;
+FrontWallParapet1 GHP2;
+FrontWallParapet1 GHP3;
+RightWallParapet1 GHP4;
+RightWallParapet1 GHP5;
+RightWallParapet1 GHP6;
+RightWallParapet1 GHP7;
+FrontWallParapet1 GHP8;
+FrontWallParapet1 GHP9;
+FrontWallParapet1 GHP10;
+
 // gate
 Gate gate;
+Gate gate1;
+Gate gate2;
 //outer hedge maze
 OHedgeMazeF OHMF;
 OHedgeMazeR OHMR;
@@ -105,6 +140,10 @@ IHedgeMaze2 IHM2;
 IHedgeMaze3 IHM3;
 IHedgeMaze4 IHM4;
 IHedgeMaze5 IHM5;
+
+//mid maze square
+MidMazeSquare MMS;
+
 
 //Back right prism
 TowerPrism BRP(12);
@@ -124,6 +163,28 @@ TowerCone BLC(12);
 //Front left cone
 TowerCone FLC(12);
 
+//Left gate house tower
+GateTower LGT;
+//Right gate house tower
+GateTower RGT;
+//Middle piece of gate house
+GateTower MGT;
+
+//Steps exiting out of gate
+MidMazeSquare S1;
+MidMazeSquare S2;
+MidMazeSquare S3;
+
+//Stone steps leading to gate
+StoneSteps SS1;
+StoneSteps SS2;
+StoneSteps SS3;
+StoneSteps SS4;
+StoneSteps SS5;
+
+//Gate house walls
+LeftWall GH1;
+RightWall GH2;
 //Prism g_prism(7);
 
 void init(void)
@@ -229,11 +290,11 @@ void init(void)
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(image5);
 
-	unsigned char* image6 = stbi_load("castle.jpg", &width, &height, &bitDepth, 0);
+	unsigned char* image6 = stbi_load("gatetower.jpg", &width, &height, &bitDepth, 0);
 	if (!image6) cout << "Unable to load file!" << endl;
 
-	glGenTextures(1, &castleTx);
-	glBindTexture(GL_TEXTURE_2D, castleTx);
+	glGenTextures(1, &gatetowerTx);
+	glBindTexture(GL_TEXTURE_2D, gatetowerTx);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image6);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -241,6 +302,19 @@ void init(void)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(image6);
+
+	unsigned char* image7 = stbi_load("stairs.jpg", &width, &height, &bitDepth, 0);
+	if (!image7) cout << "Unable to load file!" << endl;
+
+	glGenTextures(1, &stoneTx);
+	glBindTexture(GL_TEXTURE_2D, stoneTx);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image7);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(image7);
 
 	glUniform1i(glGetUniformLocation(program, "texture0"), 0);
 
@@ -391,12 +465,150 @@ void display(void)
 	FWallL.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, FWallL.NumIndices(), GL_UNSIGNED_SHORT, 0);
+	////////////////////////////////////////////////////////////////////
+	//parapets
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWP1.ColorShape(1.0f, 0.9f, 0.65f);
+	FWP1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWP1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWP2.ColorShape(1.0f, 0.9f, 0.65f);
+	FWP2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWP2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWP3.ColorShape(1.0f, 0.9f, 0.65f);
+	FWP3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWP3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWP4.ColorShape(1.0f, 0.9f, 0.65f);
+	FWP4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWP4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	FWP5.ColorShape(1.0f, 0.9f, 0.65f);
+	FWP5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, FWP5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	LWP1.ColorShape(1.0f, 0.9f, 0.65f);
+	LWP1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, LWP1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	LWP2.ColorShape(1.0f, 0.9f, 0.65f);
+	LWP2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, LWP2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	LWP3.ColorShape(1.0f, 0.9f, 0.65f);
+	LWP3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, LWP3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	LWP4.ColorShape(1.0f, 0.9f, 0.65f);
+	LWP4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, LWP4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	LWP5.ColorShape(1.0f, 0.9f, 0.65f);
+	LWP5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, LWP5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	BWP1.ColorShape(1.0f, 0.9f, 0.65f);
+	BWP1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, BWP1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	BWP2.ColorShape(1.0f, 0.9f, 0.65f);
+	BWP2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, BWP2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	BWP3.ColorShape(1.0f, 0.9f, 0.65f);
+	BWP3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, BWP3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	BWP4.ColorShape(1.0f, 0.9f, 0.65f);
+	BWP4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, BWP4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	BWP5.ColorShape(1.0f, 0.9f, 0.65f);
+	BWP5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, BWP5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	RWP1.ColorShape(1.0f, 0.9f, 0.65f);
+	RWP1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, RWP1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	RWP2.ColorShape(1.0f, 0.9f, 0.65f);
+	RWP2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, RWP2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	RWP3.ColorShape(1.0f, 0.9f, 0.65f);
+	RWP3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, RWP3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	RWP4.ColorShape(1.0f, 0.9f, 0.65f);
+	RWP4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, RWP4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	RWP5.ColorShape(1.0f, 0.9f, 0.65f);
+	RWP5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, RWP5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	glBindTexture(GL_TEXTURE_2D, gateTx);
 	gate.ColorShape(1.0f, 0.9f, 0.65f);
 	gate.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, gate.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, gateTx);
+	gate1.ColorShape(1.0f, 0.9f, 0.65f);
+	gate1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -4.4f));
+	glDrawElements(GL_TRIANGLES, gate1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, gateTx);
+	gate2.ColorShape(1.0f, 0.9f, 0.65f);
+	gate2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -2.5f));
+	glDrawElements(GL_TRIANGLES, gate2.NumIndices(), GL_UNSIGNED_SHORT, 0);
 	//gate^
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//outer hedge maze below
@@ -456,8 +668,14 @@ void display(void)
 	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
 	glDrawElements(GL_TRIANGLES, IHM5.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
-	/// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// Tower prism
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	MMS.ColorShape(1.0f, 0.9f, 0.65f);
+	MMS.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.5f, 0.0f, -3.5f));
+	glDrawElements(GL_TRIANGLES, MMS.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Tower prism*/
+
 	glBindTexture(GL_TEXTURE_2D, brickTx);
 	//BRP.ColorShape(1.0f, 0.9f, 0.65f);
 	BRP.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
@@ -482,29 +700,167 @@ void display(void)
 	transformObject(glm::vec3(1.0f, 2.5f, 1.0f), X_AXIS, 0.0f, glm::vec3(-0.8f, 0.0f, -10.9f));
 	glDrawElements(GL_TRIANGLES, BLP.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
-	glBindTexture(GL_TEXTURE_2D, castleTx);
+	/*Tower cone*/
+
+	glBindTexture(GL_TEXTURE_2D, blankTx);
 	//.ColorShape(1.0f, 0.9f, 0.65f);
 	BRC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(9.45f, 2.5f, -11.15f));
 	glDrawElements(GL_TRIANGLES, BRC.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
-	glBindTexture(GL_TEXTURE_2D, castleTx);
+	glBindTexture(GL_TEXTURE_2D, blankTx);
 	//.ColorShape(1.0f, 0.9f, 0.65f);
 	FRC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(9.45f, 2.5f, -0.45f));
 	glDrawElements(GL_TRIANGLES, FRC.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
-	glBindTexture(GL_TEXTURE_2D, castleTx);
+	glBindTexture(GL_TEXTURE_2D, blankTx);
 	//.ColorShape(1.0f, 0.9f, 0.65f);
 	BLC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(-1.05f, 2.5f, -11.15f));
 	glDrawElements(GL_TRIANGLES, BLC.NumIndices(), GL_UNSIGNED_SHORT, 0);
 
-	glBindTexture(GL_TEXTURE_2D, castleTx);
+	glBindTexture(GL_TEXTURE_2D, blankTx);
 	//.ColorShape(1.0f, 0.9f, 0.65f);
 	FLC.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
 	transformObject(glm::vec3(1.5f, 1.0f, 1.5f), X_AXIS, 0.0f, glm::vec3(-1.05f, 2.5f, -0.45f));
 	glDrawElements(GL_TRIANGLES, FLC.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Gate house towers*/
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	RGT.ColorShape(1.0f, 0.9f, 0.65f);
+	RGT.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 3.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(5.5f, 0.0f, -1.0f));
+	glDrawElements(GL_TRIANGLES, RGT.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	LGT.ColorShape(1.0f, 0.9f, 0.65f);
+	LGT.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 3.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(3.5f, 0.0f, -1.0f));
+	glDrawElements(GL_TRIANGLES, LGT.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Gate house center piece*/
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	MGT.ColorShape(1.0f, 0.9f, 0.65f);
+	MGT.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(1.0f, 1.6f, 2.0f), X_AXIS, 0.0f, glm::vec3(4.5f, 1.4f, -1.0f));
+	glDrawElements(GL_TRIANGLES, MGT.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Gate house parapets*/
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP1.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.5f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(4.0f, 1.0f, -2.5f));
+	glDrawElements(GL_TRIANGLES, GHP1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP2.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.5f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(3.0f, 1.0f, -2.5f));
+	glDrawElements(GL_TRIANGLES, GHP2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP3.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.5f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(5.0f, 1.0f, -2.5f));
+	glDrawElements(GL_TRIANGLES, GHP3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP4.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.0f, 2.0f, 1.0f), X_AXIS, 0.0f, glm::vec3(3.5f, 1.0f, -2.0f));
+	glDrawElements(GL_TRIANGLES, GHP4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP5.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.0f, 2.0f, 1.0f), X_AXIS, 0.0f, glm::vec3(3.5f, 1.0f, -1.0f));
+	glDrawElements(GL_TRIANGLES, GHP5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP6.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP6.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.0f, 2.0f, 1.0f), X_AXIS, 0.0f, glm::vec3(0.6f, 1.0f, -1.6f));
+	glDrawElements(GL_TRIANGLES, GHP6.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP7.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP7.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.0f, 2.0f, 1.0f), X_AXIS, 0.0f, glm::vec3(0.6f, 1.0f, -0.6f));
+	glDrawElements(GL_TRIANGLES, GHP7.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP8.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP8.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.5f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.8f, 1.0f, -4.4f));
+	glDrawElements(GL_TRIANGLES, GHP8.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP9.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP9.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.5f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(3.8f, 1.0f, -4.4f));
+	glDrawElements(GL_TRIANGLES, GHP9.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	GHP10.ColorShape(1.0f, 0.9f, 0.65f);
+	GHP10.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(2.5f, 2.0f, 2.0f), X_AXIS, 0.0f, glm::vec3(4.8f, 1.0f, -4.4f));
+	glDrawElements(GL_TRIANGLES, GHP10.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Stairs exiting out of gate*/
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	S1.ColorShape(1.0f, 0.9f, 0.65f);
+	S1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 0.5f, 2.0f), X_AXIS, 0.0f, glm::vec3(2.27f, 0.0f, 1.0f));
+	glDrawElements(GL_TRIANGLES, S1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	S2.ColorShape(1.0f, 0.9f, 0.65f);
+	S2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 0.5f, 1.5f), X_AXIS, 0.0f, glm::vec3(2.27f, 0.01f, 0.5f));
+	glDrawElements(GL_TRIANGLES, S2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, brickTx);
+	S3.ColorShape(1.0f, 0.9f, 0.65f);
+	S3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 0.5f, 1.0f), X_AXIS, 0.0f, glm::vec3(2.27f, 0.02f, 0.0f));
+	glDrawElements(GL_TRIANGLES, S3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Stone stairs leading towards gate*/
+	glBindTexture(GL_TEXTURE_2D, stoneTx);
+	SS4.ColorShape(1.0f, 0.9f, 0.65f);
+	SS4.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 5.0f), X_AXIS, 0.0f, glm::vec3(2.5f, -2.5f, -7.5f));
+	glDrawElements(GL_TRIANGLES, SS4.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, stoneTx);
+	SS5.ColorShape(1.0f, 0.9f, 0.65f);
+	SS5.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 5.0f), X_AXIS, 0.0f, glm::vec3(2.5f, -2.5f, -7.25f));
+	glDrawElements(GL_TRIANGLES, SS5.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, stoneTx);
+	SS1.ColorShape(1.0f, 0.9f, 0.65f);
+	SS1.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 2.0f, 5.0f), X_AXIS, 0.0f, glm::vec3(2.5f, -2.5f, -7.0f));
+	glDrawElements(GL_TRIANGLES, SS1.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, stoneTx);
+	SS3.ColorShape(1.0f, 0.9f, 0.65f);
+	SS3.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 1.0f, 5.0f), X_AXIS, 0.0f, glm::vec3(2.5f, -1.5f, -6.75f));
+	glDrawElements(GL_TRIANGLES, SS3.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, stoneTx);
+	SS2.ColorShape(1.0f, 0.9f, 0.65f);
+	SS2.BufferShape(&ibo, &points_vbo, &colors_vbo, &uv_vbo);
+	transformObject(glm::vec3(5.0f, 0.5f, 5.0f), X_AXIS, 0.0f, glm::vec3(2.5f, -1.0f, -6.5f));
+	glDrawElements(GL_TRIANGLES, SS2.NumIndices(), GL_UNSIGNED_SHORT, 0);
+
+	/*Main front entrance wooden gate*/
+
 
 	glBindVertexArray(0); // Done writing.
 	glutSwapBuffers(); // Now for a potentially smoother render.

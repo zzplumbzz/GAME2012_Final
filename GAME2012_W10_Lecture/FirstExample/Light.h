@@ -26,7 +26,7 @@ struct AmbientLight
 
 struct PointLight : public Light
 {
-	glm::vec3 position; //= glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 position;
 	GLfloat constant, linear, exponent, range;
 	PointLight(glm::vec3 pos, GLfloat range,
 		glm::vec3 dCol, GLfloat dStr) : Light(dCol, dStr)
