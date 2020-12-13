@@ -1,0 +1,21 @@
+﻿  02_CubeTexture.cpp
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(55,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(67,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(110,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(127,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=GLfloat
+          ]
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(128,30): warning C4244: 'argument': conversion from 'int' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=GLfloat
+          ]
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(165,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(3602,1): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(3613,1): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(3711,1): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\Shape.h(3736,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\FirstExample\02_CubeTexture.cpp(416,33): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+  FirstExample.vcxproj -> C:\Users\Benny\Desktop\GAME2012_Final-MazeComplete (1)\GAME2012_Final-MazeComplete\GAME2012_Final-main\GAME2012_W10_Lecture\Debug\FirstExample.exe
